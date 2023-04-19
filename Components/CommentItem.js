@@ -46,7 +46,10 @@ export const CommentItem = (item) => {
           <Text style={styles.comment}>{item.comment}</Text>
         </View>
         <Text
-          style={{ ...styles.date, textAlign: !isCurrentUserComent && "right" }}
+          style={{
+            ...styles.date,
+            textAlign: !isCurrentUserComent ? "right" : "left",
+          }}
         >
           {item.createdDate}
         </Text>
@@ -90,7 +93,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   info: {
-    // height: 30,
     flexDirection: "row",
     justifyContent: "space-between",
   },
@@ -103,17 +105,9 @@ const styles = StyleSheet.create({
     color: "#a9a9a9",
     fontSize: 10,
     lineHeight: 12,
-    // flex: 1,
-    // flexDirection: "row",
-    // justifyContent: "space-between",
-    // alignItems: "center",
-    // marginTop: 10,
   },
   commentContainer: {
     marginBottom: 8,
-    // flexDirection: "row",
-    // paddingVertical: 12,
-    // alignItems: "center",
   },
   comment: {
     color: "#212121",

@@ -21,9 +21,13 @@ import {
   query,
   equalTo,
   orderByChild,
+  once,
+  set,
+  update,
+  get,
 } from "firebase/database";
 
-import { db } from "../../firebase/config";
+import { db, storage, app, databaseRef } from "../../firebase/config";
 import {
   selectNickname,
   selectUserId,
@@ -35,9 +39,18 @@ import { LogOut } from "../../Components/LogOut";
 import { uploadPhotoOnServer } from "../../helpers/uploadPhotoOnServer";
 import { authUpdateUsersPhoto } from "../../redux/auth/authOperations";
 
+const initialeUserPhoto =
+  "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png";
+
+const userPhotoDefault =
+  // "gs://rn-social-fac3f.appspot.com/userPhoto/830dbece-e711-4b49-978f-0a9140912c04";
+  "https://firebasestorage.googleapis.com/v0/b/rn-social-fac3f.appspot.com/o/userPhoto%2F830dbece-e711-4b49-978f-0a9140912c04?alt=media&token=1b3208a7-1ad4-4935-9e25-c1b9c9854f52";
+
 export const ProfileScreen = ({ route, navigation }) => {
   const [posts, setPosts] = useState([]);
-  const [profilePhoto, setProfilePhoto] = useState(currentUserPhoto);
+  const [profilePhoto, setProfilePhoto] = useState(
+    useSelector(selectUserPhoto)
+  );
 
   const currentUserId = useSelector(selectUserId);
   const currentUserNickName = useSelector(selectNickname);
@@ -87,18 +100,14 @@ export const ProfileScreen = ({ route, navigation }) => {
       let photoLink;
       if (!result.canceled) {
         photoLink = await uploadPhotoOnServer(result.assets[0].uri);
-        // setProfilePhoto(result.assets[0].uri);
+        setProfilePhoto(photoLink);
       } else {
-        // photoLink = await uploadPhotoOnServer(initialeUserPhoto);
-        // setProfilePhoto(initialeUserPhoto);
+        photoLink = userPhotoDefault;
+        setProfilePhoto(null);
       }
 
-      setProfilePhoto(photoLink);
       dispatch(authUpdateUsersPhoto({ userPhoto: photoLink }));
-      // setState((prevState) => ({
-      //   ...prevState,
-      //   userPhoto: photoLink,
-      // }));
+      await changeAvatar(currentUserId, photoLink);
 
       // setIsLoading(false);
     } catch (error) {
@@ -106,6 +115,41 @@ export const ProfileScreen = ({ route, navigation }) => {
       // setIsLoading(false);
       return;
     }
+  };
+
+  const changeAvatar = async (userId, newPhotoUrl) => {
+    const postsRef = await databaseRef(db, "posts");
+    const postsQuery = query(
+      postsRef,
+      orderByChild("owner/userId"),
+      equalTo(userId)
+    );
+
+    try {
+      const snapshot = await get(postsQuery);
+      const updates = {};
+
+      snapshot.forEach((postSnapshot) => {
+        const postKey = postSnapshot.key;
+        const postData = postSnapshot.val();
+
+        const newOwnerData = { ...postData.owner, userPhoto: newPhotoUrl };
+
+        updates[`posts/${postKey}/owner/userPhoto`] = newPhotoUrl;
+        // updates[`posts/${postKey}/owner`] = newOwnerData;
+      });
+
+      await update(ref(db), updates);
+      console.log("Owner photo updated in all posts.");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const deleteFile = () => {
+    setProfilePhoto(null);
+
+    dispatch(authUpdateUsersPhoto({ userPhoto: userPhotoDefault }));
   };
 
   return (
@@ -117,8 +161,11 @@ export const ProfileScreen = ({ route, navigation }) => {
       >
         <View style={styles.containerContent}>
           <View style={styles.fotoContainer}>
-            <Image style={styles.profilePhoto} source={{ uri: profilePhoto }} />
-            {currentUserPhoto !== null ? (
+            <Image
+              style={styles.profilePhoto}
+              source={{ uri: profilePhoto ? profilePhoto : initialeUserPhoto }}
+            />
+            {profilePhoto === null ? (
               <TouchableOpacity style={styles.addFotoBtn} onPress={selectFile}>
                 <Icon
                   // style={styles.iconAdd}
@@ -129,8 +176,8 @@ export const ProfileScreen = ({ route, navigation }) => {
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
-              // style={styles.deleteFotoBtn}
-              // onPress={deleteFile}
+                style={styles.deleteFotoBtn}
+                onPress={deleteFile}
               >
                 <Icon
                   style={styles.iconDelete}
