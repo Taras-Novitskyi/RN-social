@@ -1,20 +1,43 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+// import { StatusBar } from 'expo-status-bar';
+import React, { useState, useEffect, useCallback } from "react";
+import { useFonts } from "expo-font";
+import * as SplashScreen from "expo-splash-screen";
+import { Provider } from "react-redux";
+import { store } from "./redux/store";
+import { Main } from "./Components/Main";
+import { View } from "react-native";
+
+// const loadFonts = async () => {
+//   await Font.loadAsync({
+//     "Roboto-Regular": require("./assets/fonts/Roboto-Regular.ttf"),
+//     "Roboto-Bold": require("./assets/fonts/Roboto-Bold.ttf"),
+//   });
+// };
+
+SplashScreen.preventAutoHideAsync();
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    "Roboto-Regular": require("./assets/fonts/Roboto-Regular.ttf"),
+    "Roboto-Medium": require("./assets/fonts/Roboto-Medium.ttf"),
+    "Roboto-Bold": require("./assets/fonts/Roboto-Bold.ttf"),
+  });
+
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded) {
+      await SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
+    <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
+      <Provider store={store}>
+        <Main style={{ fontFamily: "Roboto-Regular" }} />
+      </Provider>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
