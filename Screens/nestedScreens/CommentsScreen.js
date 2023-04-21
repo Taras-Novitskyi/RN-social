@@ -127,9 +127,6 @@ export function CommentsScreen({ route, navigation }) {
       >
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
           <>
-            {/* <View style={styles.photoContainer}>
-              <Image source={{ uri: postPhoto }} style={styles.photo} />
-            </View> */}
             {allComments.length > 0 && (
               <FlatList
                 data={allComments}
@@ -152,7 +149,6 @@ export function CommentsScreen({ route, navigation }) {
                 multiline
                 textAlignVertical="top"
                 maxLength={500}
-                // onFocus={() => setIsShowKeyboard(true)}
                 style={styles.input}
               />
               <TouchableOpacity
@@ -161,7 +157,6 @@ export function CommentsScreen({ route, navigation }) {
                 activeOpacity={0.8}
               >
                 <AntDesign name="arrowup" size={24} color="white" />
-                {/* <Text style={styles.btnTitle}>Add comment</Text> */}
               </TouchableOpacity>
             </View>
           </>
@@ -174,11 +169,8 @@ export function CommentsScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // alignItems: "center",
-    // justifyContent: "center",
   },
   photoContainer: {
-    // flex: 1,
     height: 240,
     marginTop: 32,
     marginBottom: 32,
@@ -202,25 +194,15 @@ const styles = StyleSheet.create({
 
     display: "flex",
     flexDirection: "column",
-    // alignItems: "center",
     justifyContent: "center",
 
     backgroundColor: "#ecf0f1",
     marginHorizontal: 16,
     marginTop: 16,
     marginBottom: 80,
-    // borderTopRightRadius: 25,
-    // borderTopLeftRadius: 25,
   },
   input: {
-    // display: "flex",
-    // flexDirection: "column",
-    // alignItems: 'center',
-    // justifyContent: "center",
-    // textAlign: "center",
-
     alignContent: "center",
-
     height: 50,
     padding: 16,
 
@@ -230,7 +212,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#F6F6F6F",
     // fontFamily:
     fontSize: 16,
-    // lineHeight: 19,
     color: "#212121",
   },
   button: {

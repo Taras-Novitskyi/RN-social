@@ -15,6 +15,7 @@ import {
   Platform,
   Alert,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import {
@@ -45,18 +46,21 @@ const initialState = {
 export function RegistrationScreen({ navigation }) {
   const [state, setState] = useState(initialState);
   const [profilePhoto, setProfilePhoto] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const dispatch = useDispatch();
 
   const handleSubmit = async () => {
+    setIsLoading(true);
     dispatch(authRegistryUser(state));
     setState(initialState);
     setProfilePhoto(null);
+    setIsLoading(false);
   };
 
   const selectFile = async () => {
     try {
-      // setIsLoading(true);
+      setIsLoading(true);
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.All,
         allowsEditing: true,
@@ -67,10 +71,8 @@ export function RegistrationScreen({ navigation }) {
       let photoLink;
       if (!result.canceled) {
         photoLink = await uploadPhotoToServer(result.assets[0].uri);
-        // setProfilePhoto(result.assets[0].uri);
       } else {
         photoLink = await uploadPhotoToServer(initialeUserPhoto);
-        // setProfilePhoto(initialeUserPhoto);
       }
 
       setProfilePhoto(photoLink);
@@ -79,11 +81,11 @@ export function RegistrationScreen({ navigation }) {
         userPhoto: photoLink,
       }));
 
-      // setIsLoading(false);
     } catch (error) {
       Alert.alert(error.message);
-      // setIsLoading(false);
       return;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -188,8 +190,13 @@ export function RegistrationScreen({ navigation }) {
                 style={styles.button}
                 onPress={handleSubmit}
                 activeOpacity={0.8}
+                disabled={isLoading}
               >
-                <Text style={styles.btnTitle}>Create account</Text>
+                {isLoading ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.btnTitle}>Create account</Text>
+                )}
               </TouchableOpacity>
               <View style={styles.subTitle}>
                 <Text>Are you already registered? </Text>

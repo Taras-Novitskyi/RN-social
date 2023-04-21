@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   ImageBackground,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
@@ -48,6 +49,7 @@ const userPhotoDefault =
 
 export const ProfileScreen = ({ route, navigation }) => {
   const [posts, setPosts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [profilePhoto, setProfilePhoto] = useState(
     useSelector(selectUserPhoto)
   );
@@ -89,7 +91,7 @@ export const ProfileScreen = ({ route, navigation }) => {
 
   const selectFile = async () => {
     try {
-      // setIsLoading(true);
+      setIsLoading(true);
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.All,
         allowsEditing: true,
@@ -108,12 +110,11 @@ export const ProfileScreen = ({ route, navigation }) => {
 
       dispatch(authUpdateUsersPhoto({ userPhoto: photoLink }));
       await changeAvatar(currentUserId, photoLink);
-
-      // setIsLoading(false);
     } catch (error) {
       Alert.alert(error.message);
-      // setIsLoading(false);
       return;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -161,12 +162,22 @@ export const ProfileScreen = ({ route, navigation }) => {
       >
         <View style={styles.containerContent}>
           <View style={styles.fotoContainer}>
-            <Image
-              style={styles.profilePhoto}
-              source={{ uri: profilePhoto ? profilePhoto : initialeUserPhoto }}
-            />
+            {isLoading ? (
+              <ActivityIndicator size="large" />
+            ) : (
+              <Image
+                style={styles.profilePhoto}
+                source={{
+                  uri: profilePhoto ? profilePhoto : initialeUserPhoto,
+                }}
+              />
+            )}
             {profilePhoto === null ? (
-              <TouchableOpacity style={styles.addFotoBtn} onPress={selectFile}>
+              <TouchableOpacity
+                style={styles.addFotoBtn}
+                onPress={selectFile}
+                disabled={isLoading}
+              >
                 <Icon
                   // style={styles.iconAdd}
                   name="add-outline"
@@ -178,6 +189,7 @@ export const ProfileScreen = ({ route, navigation }) => {
               <TouchableOpacity
                 style={styles.deleteFotoBtn}
                 onPress={deleteFile}
+                disabled={isLoading}
               >
                 <Icon
                   style={styles.iconDelete}
@@ -191,8 +203,6 @@ export const ProfileScreen = ({ route, navigation }) => {
           <Text style={styles.title}>{currentUserNickName}</Text>
           <View style={styles.logOut}>
             <LogOut />
-            {/* <Text>{currentUserNickName}</Text>
-            <Text>{currentUserEmail}</Text> */}
           </View>
           {posts.length > 0 && (
             <FlatList
@@ -240,6 +250,8 @@ const styles = StyleSheet.create({
     transform: [{ translateX: -50 }, { translateY: -50 }],
     height: 120,
     width: 120,
+    display: "flex",
+    justifyContent: "center",
     backgroundColor: "#F6F6F6",
     borderRadius: 16,
   },

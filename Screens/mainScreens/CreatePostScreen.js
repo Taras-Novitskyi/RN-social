@@ -13,6 +13,7 @@ import {
   TouchableWithoutFeedback,
   TextInput,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useSelector } from "react-redux";
 import uuid from "react-native-uuid";
@@ -37,11 +38,13 @@ export function CreatePostScreen({ navigation }) {
   const [camera, setCamera] = useState(null);
   const [photo, setPhoto] = useState(null);
   const [hasPermission, setHasPermission] = useState(null);
+  const [cameraIsReady, setCameraIsReady] = useState(false);
   const [type, setType] = useState(Camera.Constants.Type.back);
   const [location, setLocation] = useState("");
   const [name, setName] = useState("");
   const [coords, setCoords] = useState(null);
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const userNickname = useSelector(selectNickname);
   const userId = useSelector(selectUserId);
@@ -60,10 +63,19 @@ export function CreatePostScreen({ navigation }) {
 
   useEffect(() => {
     (async () => {
+      setIsLoading(true);
       const { status } = await Camera.requestCameraPermissionsAsync();
       await MediaLibrary.requestPermissionsAsync();
 
       setHasPermission(status === "granted");
+
+      let location = await Location.getCurrentPositionAsync();
+      const coords = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      };
+      setCoords(coords);
+      setIsLoading(false);
     })();
   }, []);
 
@@ -78,18 +90,11 @@ export function CreatePostScreen({ navigation }) {
 
     setPhoto(uri);
     const asset = await MediaLibrary.createAssetAsync(uri);
-
-    let location = await Location.getCurrentPositionAsync();
-    const coords = {
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-    };
-    setCoords(coords);
   };
 
   const selectFile = async () => {
     try {
-      // setIsLoading(true);
+      setIsLoading(true);
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.All,
         allowsEditing: true,
@@ -105,15 +110,15 @@ export function CreatePostScreen({ navigation }) {
       }
 
       setPhoto(photoLink);
-
-      // setIsLoading(false);
     } catch (error) {
       Alert.alert(error.message);
-      // setIsLoading(false);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const onCreatPost = async () => {
+    setIsLoading(true);
     if (photo === null) {
       return Alert.alert("Add a PHOTO in your post");
     }
@@ -124,6 +129,7 @@ export function CreatePostScreen({ navigation }) {
     const newPost = await uploadPostToServer();
 
     reset();
+    setIsLoading(false);
 
     navigation.navigate("Posts", {
       screen: "DefaultScreen",
@@ -154,7 +160,6 @@ export function CreatePostScreen({ navigation }) {
 
       await set(newPostRef, newPost);
 
-      // console.log("Document written with ID: ", postId);
       return newPost;
     } catch (error) {
       console.error("Error adding document: ", error);
@@ -194,7 +199,11 @@ export function CreatePostScreen({ navigation }) {
   };
 
   if (hasPermission === null) {
-    return <View>{/* <Text>No access to permission</Text> */}</View>;
+    return (
+      <View>
+        <Text>No access to permission</Text>
+      </View>
+    );
   }
   if (hasPermission === false) {
     return <Text>No access to camera</Text>;
@@ -217,12 +226,13 @@ export function CreatePostScreen({ navigation }) {
                   <Camera
                     style={styles.camera}
                     type={type}
-                    // onCameraReady={() => console.log("Camera is ready")}
+                    onCameraReady={() => setCameraIsReady(true)}
                     ref={setCamera}
                   >
                     <TouchableOpacity
                       style={styles.btnPhoto}
                       onPress={takePhoto}
+                      disabled={!cameraIsReady}
                     >
                       <Feather name="camera" size={24} color="white" />
                     </TouchableOpacity>
@@ -296,11 +306,20 @@ export function CreatePostScreen({ navigation }) {
               style={styles.button}
               onPress={onCreatPost}
               activeOpacity={0.8}
+              disabled={isLoading}
             >
-              <Text style={styles.btnTitle}>Creat Post</Text>
+              {isLoading ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.btnTitle}>Creat Post</Text>
+              )}
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.delete} onPress={reset}>
+          <TouchableOpacity
+            style={styles.delete}
+            onPress={reset}
+            disabled={isLoading}
+          >
             <Feather name="trash-2" size={24} color="#DADADA" />
           </TouchableOpacity>
         </ScrollView>
@@ -313,8 +332,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#ecf0f1",
-    // alignItems: "center",
-    // justifyContent: "flex-end",
   },
   camera: {
     height: 240,
@@ -355,12 +372,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   form: {
-    // flex: 1,
     justifyContent: "center",
     backgroundColor: "#ecf0f1",
-    // paddingHorizontal: 16,
     paddingTop: 32,
-    // paddingBottom: 76,
     borderTopRightRadius: 25,
     borderTopLeftRadius: 25,
   },
@@ -369,7 +383,6 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#E8E8E8",
-    // backgroundColor: "#F6F6F6",
     marginTop: 16,
     marginHorizontal: 16,
     borderRadius: 8,

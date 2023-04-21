@@ -1,28 +1,9 @@
-import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Button,
-  Image,
-  FlatList,
-  TouchableOpacity,
-} from "react-native";
+import React from "react";
+import { StyleSheet, Text, View, Image } from "react-native";
 import { getAuth } from "firebase/auth";
-import { Feather } from "@expo/vector-icons";
 
 export const CommentItem = (item) => {
-  // const [isCurrentUserComent, setIsCurrentUserComent] = useState();
-  // const [month, day, year, hour, minutes] = [
-  //   item.date.getMonth(),
-  //   item.date.getDate(),
-  //   item.date.getFullYear(),
-  //   item.date.getHours(),
-  //   item.date.getMinutes(),
-  // ];
-
   const currentUserId = getAuth().currentUser.uid;
-
   const isCurrentUserComent = item.userId === currentUserId;
 
   return (
@@ -53,7 +34,6 @@ export const CommentItem = (item) => {
         >
           {item.createdDate}
         </Text>
-        {/* </View> */}
       </View>
     </View>
   );
@@ -62,9 +42,6 @@ export const CommentItem = (item) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // flexDirection: "row",
-    // justifyContent: "space-between",
-    // alignItems: 'center',
     marginHorizontal: 16,
     marginBottom: 24,
   },

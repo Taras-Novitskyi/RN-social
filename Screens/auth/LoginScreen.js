@@ -14,6 +14,7 @@ import {
   Platform,
   Alert,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 
 import { authSignInUser } from "../../redux/auth/authOperations";
@@ -25,15 +26,15 @@ const initialState = {
 
 export function LoginScreen({ navigation }) {
   const [state, setState] = useState(initialState);
+  const [isLoading, setIsLoading] = useState(false);
 
   const dispatch = useDispatch();
 
   const handleSubmit = () => {
-    // Alert.alert(`{ ${email}, ${password} }`);
+    setIsLoading(true);
     dispatch(authSignInUser(state));
-
-    // navigation.navigate("Home");
     setState(initialState);
+    setIsLoading(false);
   };
 
   return (
@@ -79,8 +80,13 @@ export function LoginScreen({ navigation }) {
                 style={styles.button}
                 onPress={handleSubmit}
                 activeOpacity={0.8}
+                disabled={isLoading}
               >
-                <Text style={styles.btnTitle}>Log in</Text>
+                {isLoading ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.btnTitle}>Log in</Text>
+                )}
               </TouchableOpacity>
               <View style={styles.subTitle}>
                 <Text>You don't have account? </Text>
