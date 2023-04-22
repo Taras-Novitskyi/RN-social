@@ -42,7 +42,6 @@ export function CreatePostScreen({ navigation }) {
   const [type, setType] = useState(Camera.Constants.Type.back);
   const [location, setLocation] = useState("");
   const [name, setName] = useState("");
-  const [coords, setCoords] = useState(null);
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -68,13 +67,6 @@ export function CreatePostScreen({ navigation }) {
       await MediaLibrary.requestPermissionsAsync();
 
       setHasPermission(status === "granted");
-
-      let location = await Location.getCurrentPositionAsync();
-      const coords = {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      };
-      setCoords(coords);
       setIsLoading(false);
     })();
   }, []);
@@ -126,7 +118,13 @@ export function CreatePostScreen({ navigation }) {
       return Alert.alert("Add a NAME in your post");
     }
 
-    const newPost = await uploadPostToServer();
+    let location = await Location.getCurrentPositionAsync();
+    const coords = {
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+    };
+
+    const newPost = await uploadPostToServer(coords);
 
     reset();
     setIsLoading(false);
@@ -137,7 +135,7 @@ export function CreatePostScreen({ navigation }) {
     });
   };
 
-  const uploadPostToServer = async () => {
+  const uploadPostToServer = async (coords) => {
     try {
       const postListRef = await databaseRef(db, "posts");
       const newPostRef = await push(postListRef);
@@ -232,7 +230,7 @@ export function CreatePostScreen({ navigation }) {
                     <TouchableOpacity
                       style={styles.btnPhoto}
                       onPress={takePhoto}
-                      disabled={!cameraIsReady}
+                      disabled={!cameraIsReady || isLoading}
                     >
                       <Feather name="camera" size={24} color="white" />
                     </TouchableOpacity>
@@ -270,6 +268,7 @@ export function CreatePostScreen({ navigation }) {
                 <TouchableOpacity
                   style={styles.btnPhoto}
                   onPress={() => setPhoto(null)}
+                  disabled={!cameraIsReady || isLoading}
                 >
                   <Feather name="camera" size={24} color="white" />
                 </TouchableOpacity>
