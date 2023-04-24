@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   StyleSheet,
   Text,
@@ -18,9 +18,21 @@ import { set, push, ref, onValue, child, get } from "firebase/database";
 import { getAuth } from "firebase/auth";
 import { AntDesign } from "@expo/vector-icons";
 
-import { selectNickname, selectUserId } from "../../redux/auth/authSelectors";
+import {
+  selectNickname,
+  selectUserId,
+  selectUserPhoto,
+} from "../../redux/auth/authSelectors";
 import { db, databaseRef, app } from "../../firebase/config";
 import { CommentItem } from "../../Components/CommentItem";
+
+const ListHeaderComponent = React.memo(({ postPhoto }) => {
+  return (
+    <View style={styles.photoContainer}>
+      <Image source={{ uri: postPhoto }} style={styles.photo} />
+    </View>
+  );
+});
 
 export function CommentsScreen({ route, navigation }) {
   const [comment, setComment] = useState("");
@@ -29,6 +41,7 @@ export function CommentsScreen({ route, navigation }) {
 
   const nickname = useSelector(selectNickname);
   const userId = useSelector(selectUserId);
+  const userPhoto = useSelector(selectUserPhoto);
 
   const { postId } = route.params;
   const commentHandler = (text) => setComment(text);
@@ -38,11 +51,15 @@ export function CommentsScreen({ route, navigation }) {
     getPostPhoto();
   }, []);
 
+  // useEffect(() => {
+  //   getPostPhoto();
+  // }, [postId]);
+
   const getPostPhoto = async () => {
     const postRef = await databaseRef(db, "posts/" + postId);
     let postPhoto = null;
 
-    await onValue(
+    onValue(
       postRef,
       (snapshot) => {
         // id: childSnapshot.key,
@@ -56,22 +73,18 @@ export function CommentsScreen({ route, navigation }) {
         onlyOnce: true,
       }
     );
-
-    // return postPhoto;
   };
-
-  getPostPhoto();
 
   const getAllComments = async () => {
     const commentsRef = await databaseRef(db, "posts/" + postId + "/comments");
     let allCommentsDB = [];
 
-    await onValue(
+    onValue(
       commentsRef,
       (snapshot) => {
         snapshot.forEach((childSnapshot) => {
           const commentItem = {
-            // id: childSnapshot.key,
+            id: childSnapshot.key,
             ...childSnapshot.val(),
           };
           allCommentsDB.push(commentItem);
@@ -79,10 +92,10 @@ export function CommentsScreen({ route, navigation }) {
 
         setAllComments(allCommentsDB);
         allCommentsDB = [];
+      },
+      {
+        onlyOnce: true,
       }
-      // {
-      //   onlyOnce: true,
-      // }
     );
   };
 
@@ -111,13 +124,13 @@ export function CommentsScreen({ route, navigation }) {
     setComment("");
   };
 
-  const ListHeaderComponent = () => {
-    return (
-      <View style={styles.photoContainer}>
-        <Image source={{ uri: postPhoto }} style={styles.photo} />
-      </View>
-    );
-  };
+  // const ListHeaderComponent = () => {
+  //   return (
+  //     <View style={styles.photoContainer}>
+  //       <Image source={{ uri: postPhoto }} style={styles.photo} />
+  //     </View>
+  //   );
+  // };
 
   return (
     <View style={styles.container}>
@@ -130,17 +143,22 @@ export function CommentsScreen({ route, navigation }) {
             {allComments.length > 0 && (
               <FlatList
                 data={allComments}
+                // renderItem={({ item }) => CommentItem(item, userId)}
                 renderItem={({ item }) => CommentItem(item)}
                 keyExtractor={(item, index) => index.toString()}
-                ListHeaderComponent={ListHeaderComponent}
+                ListHeaderComponent={() => (
+                  <ListHeaderComponent postPhoto={postPhoto} />
+                )}
               />
             )}
             {allComments.length === 0 && (
-              <Text style={styles.title}>No comments</Text>
+              <>
+                <ListHeaderComponent postPhoto={postPhoto} />
+                <Text style={styles.title}>No comments</Text>
+              </>
             )}
             <View style={styles.form}>
               <TextInput
-                // inlineImageLeft="search_icon"
                 value={comment}
                 name="comment"
                 onChangeText={commentHandler}

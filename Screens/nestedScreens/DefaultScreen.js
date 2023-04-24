@@ -8,6 +8,7 @@ import {
   Image,
   FlatList,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { getDatabase, ref, onValue } from "firebase/database";
 
@@ -17,6 +18,8 @@ import { selectUserId } from "../../redux/auth/authSelectors";
 
 export function DefaultScreen({ route, navigation }) {
   const [posts, setPosts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
   const currentUserId = useSelector(selectUserId);
 
   useEffect(() => {
@@ -24,15 +27,16 @@ export function DefaultScreen({ route, navigation }) {
   }, []);
 
   const getAllPosts = async () => {
+    setIsLoading(true);
     const dbRef = ref(db, "posts");
     let allPosts = [];
 
-    onValue(
+    await onValue(
       dbRef,
       (snapshot) => {
         snapshot.forEach((childSnapshot) => {
           const postItem = {
-            // id: childSnapshot.key,
+            id: childSnapshot.key,
             ...childSnapshot.val(),
           };
           allPosts.unshift(postItem);
@@ -45,21 +49,26 @@ export function DefaultScreen({ route, navigation }) {
       //   onlyOnce: true,
       // }
     );
+    setIsLoading(false);
   };
 
   return (
     <View style={styles.container}>
-      {posts.length > 0 && (
-        <FlatList
-          data={posts}
-          renderItem={({ item }) =>
-            PostsListItem(item, navigation, currentUserId)
-          }
-          keyExtractor={(item, index) => index.toString()}
-        />
-      )}
-      {posts.length === 0 && (
-        <Text style={styles.title}>You have no posts</Text>
+      {isLoading ? (
+        <ActivityIndicator size="large" />
+      ) : (
+        <>
+          {posts.length > 0 && (
+            <FlatList
+              data={posts}
+              renderItem={({ item }) =>
+                PostsListItem(item, navigation, currentUserId)
+              }
+              keyExtractor={(item, index) => index.toString()}
+            />
+          )}
+          {posts.length === 0 && <Text style={styles.title}>No posts</Text>}
+        </>
       )}
     </View>
   );

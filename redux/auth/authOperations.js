@@ -6,6 +6,7 @@ import {
   onAuthStateChanged,
   signOut,
 } from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   updateUserProfile,
   authStateChange,
@@ -31,8 +32,6 @@ export const authRegistryUser =
         photoURL: userPhoto,
       });
 
-      // const dataUser = user.auth.currentUser;
-
       dispatch(
         updateUserProfile({
           userId: user.uid,
@@ -54,16 +53,21 @@ export const authSignInUser =
     try {
       const auth = getAuth();
       const { user } = await signInWithEmailAndPassword(auth, email, password);
-      // const dataUser = user.auth.currentUser;
 
-      dispatch(
-        updateUserProfile({
-          userId: user.uid,
-          nickname: user.displayName,
-          userPhoto: user.photoURL,
-          email: user.email,
-        })
-      );
+      updateUser = {
+        userId: user.uid,
+        nickname: user.displayName,
+        userPhoto: user.photoURL,
+        email: user.email,
+      };
+
+      // if (user) {
+      //   AsyncStorage.setItem("currentUser", JSON.stringify(updateUser));
+      // } else {
+      //   AsyncStorage.removeItem("currentUser");
+      // }
+
+      dispatch(updateUserProfile(updateUser));
     } catch (error) {
       const errorCode = error.code;
       const errorMessage = error.message;
@@ -107,11 +111,9 @@ export const authUpdateUsersPhoto =
 
 export const authStateChanged = () => async (dispatch, getState) => {
   const auth = getAuth();
-  onAuthStateChanged(auth, (user) => {
+  await onAuthStateChanged(auth, (user) => {
     if (user) {
-      // const dataUser = user.auth.currentUser;
       console.log("user is signed in");
-      // console.log(user);
 
       dispatch(
         updateUserProfile({
@@ -127,6 +129,26 @@ export const authStateChanged = () => async (dispatch, getState) => {
       console.log("User is signed out");
     }
   });
+};
+
+export const authRefresh = (user) => async (dispatch, getState) => {
+  const auth = getAuth();
+  if (user) {
+    console.log("user is signed in");
+
+    dispatch(
+      updateUserProfile({
+        userId: user.uid,
+        nickname: user.displayName,
+        userPhoto: user.photoURL,
+        email: user.email,
+      })
+    );
+
+    dispatch(authStateChange({ stateChange: true }));
+  } else {
+    console.log("User is signed out");
+  }
 };
 
 export const authCommentsActivityChanged =

@@ -52,7 +52,7 @@ export function RegistrationScreen({ navigation }) {
 
   const handleSubmit = async () => {
     setIsLoading(true);
-    dispatch(authRegistryUser(state));
+    await dispatch(authRegistryUser(state));
     setState(initialState);
     setProfilePhoto(null);
     setIsLoading(false);

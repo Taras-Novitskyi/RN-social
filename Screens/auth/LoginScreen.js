@@ -30,9 +30,9 @@ export function LoginScreen({ navigation }) {
 
   const dispatch = useDispatch();
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsLoading(true);
-    dispatch(authSignInUser(state));
+    await dispatch(authSignInUser(state));
     setState(initialState);
     setIsLoading(false);
   };
