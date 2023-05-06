@@ -3,6 +3,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { Provider } from "react-redux";
+import Toast from "react-native-toast-message";
+
 import { store } from "./redux/store";
 import { Main } from "./Components/Main";
 import { View } from "react-native";
@@ -37,6 +39,7 @@ export default function App() {
     <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
       <Provider store={store}>
         <Main style={{ fontFamily: "Roboto-Regular" }} />
+        <Toast />
       </Provider>
     </View>
   );

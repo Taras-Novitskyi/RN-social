@@ -12,6 +12,7 @@ import { ref, onValue } from "firebase/database";
 import { db } from "../../firebase/config";
 import { PostsListItem } from "../../Components/PostsListItem";
 import { selectUserId } from "../../redux/auth/authSelectors";
+import { showToast } from "../../helpers/showErrorToast";
 
 export function DefaultScreen({ route, navigation }) {
   const [posts, setPosts] = useState([]);
@@ -24,23 +25,31 @@ export function DefaultScreen({ route, navigation }) {
   }, []);
 
   const getAllPosts = async () => {
-    setIsLoading(true);
-    const dbRef = ref(db, "posts");
-    let allPosts = [];
+    try {
+      setIsLoading(true);
+      const dbRef = ref(db, "posts");
+      let allPosts = [];
 
-    await onValue(dbRef, (snapshot) => {
-      snapshot.forEach((childSnapshot) => {
-        const postItem = {
-          id: childSnapshot.key,
-          ...childSnapshot.val(),
-        };
-        allPosts.unshift(postItem);
+      await onValue(dbRef, (snapshot) => {
+        snapshot.forEach((childSnapshot) => {
+          const postItem = {
+            id: childSnapshot.key,
+            ...childSnapshot.val(),
+          };
+          allPosts.unshift(postItem);
+        });
+
+        setPosts(allPosts);
+        allPosts = [];
       });
-
-      setPosts(allPosts);
-      allPosts = [];
-    });
-    setIsLoading(false);
+    } catch (error) {
+      showToast({
+        text1: `Something wrong, try again.`,
+        text2: `Error ${error.message}`,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -71,7 +80,6 @@ const styles = StyleSheet.create({
     paddingBottom: 76,
   },
   photoContainer: {
-    // flex: 1,
     height: 240,
     marginBottom: 8,
     alignItems: "center",

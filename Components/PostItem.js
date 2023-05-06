@@ -62,7 +62,6 @@ export const PostItem = ({ item, navigation, currentUserId }) => {
       userId: currentUserId,
     };
 
-    // setCurrentUserLikeId(likeId);
     currentUserLikeId = likeId;
     await set(newLikeRef, newLike);
   };

@@ -11,6 +11,7 @@ import { app } from "../firebase/config";
 import { useRoute } from "../router";
 import { authStateChanged, authRefresh } from "../redux/auth/authOperations";
 import { selectStateChange } from "../redux/auth/authSelectors";
+import { showToast } from "../helpers/showErrorToast";
 
 export const Main = () => {
   const stateChange = useSelector(selectStateChange);
@@ -22,9 +23,12 @@ export const Main = () => {
         // const currentUser = await AsyncStorage.getItem("currentUser");
         // if (currentUser !== null) {
         //   dispatch(authRefresh(JSON.parse(currentUser)));
-          dispatch(authStateChanged());
-      } catch (e) {
-        console.error(e);
+        dispatch(authStateChanged());
+      } catch (error) {
+        showToast({
+          text1: `Something wrong, try again.`,
+          text2: `Error ${error.message}`,
+        });
       }
     })();
   }, []);

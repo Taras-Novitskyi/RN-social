@@ -6,15 +6,14 @@ import {
   onAuthStateChanged,
   signOut,
 } from "firebase/auth";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   updateUserProfile,
   authStateChange,
   authSignOut,
   updateUserPhoto,
 } from "./authReducer";
-import { app } from "../../firebase/config";
 import { auth } from "../../firebase/config";
+import { showToast } from "../../helpers/showErrorToast";
 
 export const authRegistryUser =
   ({ name, email, password, userPhoto }) =>
@@ -41,9 +40,10 @@ export const authRegistryUser =
         })
       );
     } catch (error) {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.log("error.massage:", errorMessage);
+      showToast({
+        text1: `Something wrong, try again.`,
+        text2: `Error ${error.message}`,
+      });
     }
   };
 
@@ -61,17 +61,12 @@ export const authSignInUser =
         email: user.email,
       };
 
-      // if (user) {
-      //   AsyncStorage.setItem("currentUser", JSON.stringify(updateUser));
-      // } else {
-      //   AsyncStorage.removeItem("currentUser");
-      // }
-
       dispatch(updateUserProfile(updateUser));
     } catch (error) {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.log("error.massage:", errorMessage);
+      showToast({
+        text1: `Something wrong, try again.`,
+        text2: `Error ${error.message}`,
+      });
     }
   };
 
@@ -81,9 +76,10 @@ export const authLogOutUser = () => async (dispatch, getState) => {
     await signOut(auth);
     dispatch(authSignOut());
   } catch (error) {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    console.log("error.massage:", errorMessage);
+    showToast({
+      text1: `Something wrong, try again.`,
+      text2: `Error ${error.message}`,
+    });
   }
 };
 
@@ -103,9 +99,10 @@ export const authUpdateUsersPhoto =
         })
       );
     } catch (error) {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.log("error.massage:", errorMessage);
+      showToast({
+        text1: `Something wrong, try again.`,
+        text2: `Error ${error.message}`,
+      });
     }
   };
 
@@ -113,8 +110,6 @@ export const authStateChanged = () => async (dispatch, getState) => {
   const auth = getAuth();
   await onAuthStateChanged(auth, (user) => {
     if (user) {
-      console.log("user is signed in");
-
       dispatch(
         updateUserProfile({
           userId: user.uid,
@@ -125,8 +120,6 @@ export const authStateChanged = () => async (dispatch, getState) => {
       );
 
       dispatch(authStateChange({ stateChange: true }));
-    } else {
-      console.log("User is signed out");
     }
   });
 };
@@ -134,8 +127,6 @@ export const authStateChanged = () => async (dispatch, getState) => {
 export const authRefresh = (user) => async (dispatch, getState) => {
   const auth = getAuth();
   if (user) {
-    console.log("user is signed in");
-
     dispatch(
       updateUserProfile({
         userId: user.uid,
@@ -147,33 +138,24 @@ export const authRefresh = (user) => async (dispatch, getState) => {
 
     dispatch(authStateChange({ stateChange: true }));
   } else {
-    console.log("User is signed out");
+    showToast({ text1: "User is signed out" });
   }
 };
 
 export const authCommentsActivityChanged =
   ({ postId }) =>
   async (dispatch, getState) => {
-    // const auth = getAuth(app);
     const user = await auth.currentUser;
 
     if (user) {
       const userCommentsActivity = user.userActivity.comments;
-      // const userLikesActivity = user.userActivity.likes;
 
       userCommentsActivity.push(postId);
-      // userLikesActivity.push(postId);
 
       await updateProfile(user, {
         userActivity: { ...user.userActivity, comments: userCommentsActivity },
       });
-
-      // dispatch(
-      //   updateUserActivity({
-      //     activity: dataUser.userActivity,
-      //   })
-      // );
     } else {
-      // User is signed out
+      showToast({ text1: "User is signed out" });
     }
   };

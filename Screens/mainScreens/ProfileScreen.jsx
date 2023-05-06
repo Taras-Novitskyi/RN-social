@@ -33,6 +33,7 @@ import { PostItem } from "../../Components/PostItem";
 import { LogOut } from "../../Components/LogOut";
 import { uploadPhotoOnServer } from "../../helpers/uploadPhotoOnServer";
 import { authUpdateUsersPhoto } from "../../redux/auth/authOperations";
+import { showToast } from "../../helpers/showErrorToast";
 
 const initialeUserPhoto =
   "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png";
@@ -57,27 +58,37 @@ export const ProfileScreen = ({ route, navigation }) => {
   }, []);
 
   const getUserPosts = async () => {
-    const dbRef = ref(db, "posts");
-    let allUserPosts = [];
+    try {
+      setIsLoading(true);
+      const dbRef = ref(db, "posts");
+      let allUserPosts = [];
 
-    const userPostsRef = query(
-      dbRef,
-      orderByChild("owner/" + "userId"),
-      equalTo(currentUserId)
-    );
+      const userPostsRef = query(
+        dbRef,
+        orderByChild("owner/" + "userId"),
+        equalTo(currentUserId)
+      );
 
-    onValue(userPostsRef, (snapshot) => {
-      snapshot.forEach((childSnapshot) => {
-        const postItem = {
-          // id: childSnapshot.key,
-          ...childSnapshot.val(),
-        };
-        allUserPosts.unshift(postItem);
+      onValue(userPostsRef, (snapshot) => {
+        snapshot.forEach((childSnapshot) => {
+          const postItem = {
+            id: childSnapshot.key,
+            ...childSnapshot.val(),
+          };
+          allUserPosts.unshift(postItem);
+        });
+
+        setPosts(allUserPosts);
+        allUserPosts = [];
       });
-
-      setPosts(allUserPosts);
-      allUserPosts = [];
-    });
+    } catch (error) {
+      showToast({
+        text1: `Something wrong, try again.`,
+        text2: `Error ${error.message}`,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const selectFile = async () => {
@@ -102,8 +113,10 @@ export const ProfileScreen = ({ route, navigation }) => {
       dispatch(authUpdateUsersPhoto({ userPhoto: photoLink }));
       await changeAvatar(currentUserId, photoLink);
     } catch (error) {
-      Alert.alert(error.message);
-      return;
+      showToast({
+        text1: `Something wrong, try again.`,
+        text2: `Error ${error.message}`,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -144,8 +157,10 @@ export const ProfileScreen = ({ route, navigation }) => {
 
       await update(ref(db), updates);
     } catch (error) {
-      Alert.alert(error.message);
-      console.error(error);
+      showToast({
+        text1: `Something wrong, try again.`,
+        text2: `Error ${error.message}`,
+      });
     }
   };
 
