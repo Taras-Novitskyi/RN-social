@@ -4,7 +4,6 @@ import {
   StyleSheet,
   Text,
   View,
-  Button,
   Image,
   FlatList,
   TouchableOpacity,
@@ -14,25 +13,20 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
-import { Feather } from "@expo/vector-icons";
 import {
-  getDatabase,
   ref,
   onValue,
   query,
   equalTo,
   orderByChild,
-  once,
-  set,
   update,
   get,
 } from "firebase/database";
 
-import { db, storage, app, databaseRef } from "../../firebase/config";
+import { db, databaseRef } from "../../firebase/config";
 import {
   selectNickname,
   selectUserId,
-  selectUserEmail,
   selectUserPhoto,
 } from "../../redux/auth/authSelectors";
 import { PostItem } from "../../Components/PostItem";
@@ -44,8 +38,7 @@ const initialeUserPhoto =
   "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png";
 
 const userPhotoDefault =
-  // "gs://rn-social-fac3f.appspot.com/userPhoto/830dbece-e711-4b49-978f-0a9140912c04";
-  "https://firebasestorage.googleapis.com/v0/b/rn-social-fac3f.appspot.com/o/userPhoto%2F830dbece-e711-4b49-978f-0a9140912c04?alt=media&token=1b3208a7-1ad4-4935-9e25-c1b9c9854f52";
+  "https://firebasestorage.googleapis.com/v0/b/rn-social-fac3f.appspot.com/o/userPhoto%2F3a7634b6-748c-45c0-970f-6d4272c9cb01?alt=media&token=e35ba15e-8e10-4542-bf09-7b2578a6bf8c";
 
 export const ProfileScreen = ({ route, navigation }) => {
   const [posts, setPosts] = useState([]);
@@ -56,8 +49,6 @@ export const ProfileScreen = ({ route, navigation }) => {
 
   const currentUserId = useSelector(selectUserId);
   const currentUserNickName = useSelector(selectNickname);
-  const currentUserEmail = useSelector(selectUserEmail);
-  const currentUserPhoto = useSelector(selectUserPhoto);
 
   const dispatch = useDispatch();
 
@@ -119,37 +110,49 @@ export const ProfileScreen = ({ route, navigation }) => {
   };
 
   const changeAvatar = async (userId, newPhotoUrl) => {
-    const postsRef = await databaseRef(db, "posts");
-    const postsQuery = query(
-      postsRef,
-      orderByChild("owner/userId"),
-      equalTo(userId)
-    );
-
     try {
-      const snapshot = await get(postsQuery);
+      const postsRef = databaseRef(db, "posts");
+      const postsQuery = query(
+        postsRef,
+        orderByChild("owner/userId"),
+        equalTo(userId)
+      );
+
       const updates = {};
+
+      const postsSnap = await get(postsRef);
+
+      postsSnap.forEach((postSnapshot) => {
+        const postId = postSnapshot.key;
+        const post = postSnapshot.val();
+        const postComments = post.comments || {};
+        Object.keys(postComments).forEach((commentKey) => {
+          const comment = postComments[commentKey];
+          if (comment.userId === userId) {
+            updates[`posts/${postId}/comments/${commentKey}/userPhoto`] =
+              newPhotoUrl;
+          }
+        });
+      });
+
+      const snapshot = await get(postsQuery);
 
       snapshot.forEach((postSnapshot) => {
         const postKey = postSnapshot.key;
-        const postData = postSnapshot.val();
-
-        const newOwnerData = { ...postData.owner, userPhoto: newPhotoUrl };
-
         updates[`posts/${postKey}/owner/userPhoto`] = newPhotoUrl;
-        // updates[`posts/${postKey}/owner`] = newOwnerData;
       });
 
       await update(ref(db), updates);
-      console.log("Owner photo updated in all posts.");
     } catch (error) {
+      Alert.alert(error.message);
       console.error(error);
     }
   };
 
-  const deleteFile = () => {
+  const deleteFile = async () => {
     setProfilePhoto(null);
 
+    await changeAvatar(currentUserId, userPhotoDefault);
     dispatch(authUpdateUsersPhoto({ userPhoto: userPhotoDefault }));
   };
 
@@ -172,7 +175,7 @@ export const ProfileScreen = ({ route, navigation }) => {
                 }}
               />
             )}
-            {profilePhoto === null ? (
+            {profilePhoto === null || profilePhoto === userPhotoDefault ? (
               <TouchableOpacity
                 style={styles.addFotoBtn}
                 onPress={selectFile}

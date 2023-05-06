@@ -1,9 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View, Image } from "react-native";
-import { getAuth } from "firebase/auth";
 
-export const CommentItem = (item) => {
-  const currentUserId = getAuth().currentUser.uid;
+export const CommentItem = (item, currentUserId) => {
   const isCurrentUserComent = item.userId === currentUserId;
 
   return (

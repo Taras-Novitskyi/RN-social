@@ -49,14 +49,10 @@ export function CommentsScreen({ route, navigation }) {
   useEffect(() => {
     getAllComments();
     getPostPhoto();
-  }, []);
-
-  // useEffect(() => {
-  //   getPostPhoto();
-  // }, [postId]);
+  }, [route]);
 
   const getPostPhoto = async () => {
-    const postRef = await databaseRef(db, "posts/" + postId);
+    const postRef = databaseRef(db, "posts/" + postId);
     let postPhoto = null;
 
     onValue(
@@ -79,34 +75,28 @@ export function CommentsScreen({ route, navigation }) {
     const commentsRef = await databaseRef(db, "posts/" + postId + "/comments");
     let allCommentsDB = [];
 
-    onValue(
-      commentsRef,
-      (snapshot) => {
-        snapshot.forEach((childSnapshot) => {
-          const commentItem = {
-            id: childSnapshot.key,
-            ...childSnapshot.val(),
-          };
-          allCommentsDB.push(commentItem);
-        });
+    onValue(commentsRef, (snapshot) => {
+      snapshot.forEach((childSnapshot) => {
+        const commentItem = {
+          id: childSnapshot.key,
+          ...childSnapshot.val(),
+        };
+        allCommentsDB.push(commentItem);
+      });
 
-        setAllComments(allCommentsDB);
-        allCommentsDB = [];
-      },
-      {
-        onlyOnce: true,
-      }
-    );
+      setAllComments(allCommentsDB);
+      allCommentsDB = [];
+    });
   };
 
   const createComment = async () => {
-    const commentsRef = await databaseRef(db, "posts/" + postId + "/comments");
+    const commentsRef = databaseRef(db, "posts/" + postId + "/comments");
     const createdDate = new Date().toLocaleString();
 
     const newCommentRef = await push(commentsRef);
 
     const auth = getAuth();
-    const userPhoto = await auth.currentUser.photoURL;
+    const userPhoto = auth.currentUser.photoURL;
 
     const commentId = newCommentRef.key;
     const newComment = {
@@ -116,12 +106,14 @@ export function CommentsScreen({ route, navigation }) {
       userId,
       userPhoto,
       comment,
+      postId,
     };
 
     await set(newCommentRef, newComment);
 
     Keyboard.dismiss();
     setComment("");
+    getAllComments();
   };
 
   // const ListHeaderComponent = () => {
@@ -133,18 +125,18 @@ export function CommentsScreen({ route, navigation }) {
   // };
 
   return (
-    <View style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS == "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-      >
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <View style={styles.container}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS == "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
+        >
           <>
             {allComments.length > 0 && (
               <FlatList
                 data={allComments}
                 // renderItem={({ item }) => CommentItem(item, userId)}
-                renderItem={({ item }) => CommentItem(item)}
+                renderItem={({ item }) => CommentItem(item, userId)}
                 keyExtractor={(item, index) => index.toString()}
                 ListHeaderComponent={() => (
                   <ListHeaderComponent postPhoto={postPhoto} />
@@ -178,9 +170,9 @@ export function CommentsScreen({ route, navigation }) {
               </TouchableOpacity>
             </View>
           </>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-    </View>
+        </KeyboardAvoidingView>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -227,7 +219,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E8E8E8",
     borderRadius: 100,
-    backgroundColor: "#F6F6F6F",
+    // backgroundColor: "#F6F6F6F",
     // fontFamily:
     fontSize: 16,
     color: "#212121",
@@ -260,7 +252,7 @@ const styles = StyleSheet.create({
     marginBottom: 80,
     marginLeft: "auto",
     marginRight: "auto",
-    backgroundColor: "#F6F6F6",
+    // backgroundColor: "#F6F6F6",
     borderRadius: 20,
   },
 });

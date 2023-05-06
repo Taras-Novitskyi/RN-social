@@ -1,19 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useDispatch } from "react-redux";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Button,
-  Image,
-  FlatList,
-  TouchableOpacity,
-} from "react-native";
+import { StyleSheet } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { getHeaderTitle } from "@react-navigation/elements";
-import { Feather } from "@expo/vector-icons";
 
-import { app, auth } from "../../firebase/config";
 import { authLogOutUser } from "../../redux/auth/authOperations";
 import { CommentsScreen } from "../nestedScreens/CommentsScreen";
 import { MapScreen } from "../nestedScreens/MapScreen";
@@ -48,10 +37,7 @@ export const PostsScreen = ({ route, navigation }) => {
           options={{
             title: "Posts",
             headerRight: () => (
-              // <TouchableOpacity style={{ marginRight: 10 }} onPress={logOut}>
-              //   <Feather name="log-in" size={24} color="#BDBDBD" />
-              // </TouchableOpacity>
-              <LogOut/>
+              <LogOut />
             ),
           }}
         />
@@ -67,7 +53,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   photoContainer: {
-    // flex: 1,
     height: 240,
     marginBottom: 8,
     alignItems: "center",

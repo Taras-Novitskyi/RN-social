@@ -4,13 +4,10 @@ import {
   StyleSheet,
   Text,
   View,
-  Button,
-  Image,
   FlatList,
-  TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import { getDatabase, ref, onValue } from "firebase/database";
+import { ref, onValue } from "firebase/database";
 
 import { db } from "../../firebase/config";
 import { PostsListItem } from "../../Components/PostsListItem";
@@ -31,24 +28,18 @@ export function DefaultScreen({ route, navigation }) {
     const dbRef = ref(db, "posts");
     let allPosts = [];
 
-    await onValue(
-      dbRef,
-      (snapshot) => {
-        snapshot.forEach((childSnapshot) => {
-          const postItem = {
-            id: childSnapshot.key,
-            ...childSnapshot.val(),
-          };
-          allPosts.unshift(postItem);
-        });
+    await onValue(dbRef, (snapshot) => {
+      snapshot.forEach((childSnapshot) => {
+        const postItem = {
+          id: childSnapshot.key,
+          ...childSnapshot.val(),
+        };
+        allPosts.unshift(postItem);
+      });
 
-        setPosts(allPosts);
-        allPosts = [];
-      }
-      // {
-      //   onlyOnce: true,
-      // }
-    );
+      setPosts(allPosts);
+      allPosts = [];
+    });
     setIsLoading(false);
   };
 
@@ -62,7 +53,7 @@ export function DefaultScreen({ route, navigation }) {
             <FlatList
               data={posts}
               renderItem={({ item }) =>
-                PostsListItem(item, navigation, currentUserId)
+                PostsListItem({ item, navigation, currentUserId })
               }
               keyExtractor={(item, index) => index.toString()}
             />

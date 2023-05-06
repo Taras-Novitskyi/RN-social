@@ -23,7 +23,6 @@ export const Main = () => {
         // if (currentUser !== null) {
         //   dispatch(authRefresh(JSON.parse(currentUser)));
           dispatch(authStateChanged());
-        // }
       } catch (e) {
         console.error(e);
       }

@@ -1,45 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Button,
-  Image,
-  FlatList,
-  TouchableOpacity,
-} from "react-native";
-import {
-  set,
-  push,
-  ref,
-  onValue,
-  remove,
-  getDatabase,
-  onChildAdded,
-  onChildChanged,
-  onChildRemoved,
-} from "firebase/database";
+import React from "react";
+import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
+import { set, push, remove } from "firebase/database";
 
-import { Feather, FontAwesome, AntDesign } from "@expo/vector-icons";
+import { Feather, AntDesign } from "@expo/vector-icons";
 import Icon from "react-native-vector-icons/Ionicons";
 
-import { db, databaseRef, app } from "../firebase/config";
-import { updateCountLikes } from "../redux/posts/postsOperation";
-import {
-  selectUserId,
-  selectNickname,
-  selectUserEmail,
-  selectUserPhoto,
-} from "../redux/auth/authSelectors";
-import { async } from "@firebase/util";
+import { db, databaseRef } from "../firebase/config";
 
 export const PostItem = ({ item, navigation, currentUserId }) => {
-  // const [currentUserLikeId, setCurrentUserLikeId] = useState(null);
-
-  // const currentUserId = useSelector(selectUserId);
-  // console.log(currentUserId);
-
   const countComments = item.comments ? Object.keys(item.comments).length : 0;
   const countLikes = item.likes ? Object.values(item.likes).length : 0;
 

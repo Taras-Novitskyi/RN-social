@@ -1,17 +1,8 @@
-import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Button,
-  Image,
-  FlatList,
-  TouchableOpacity,
-} from "react-native";
-import { Feather } from "@expo/vector-icons";
+import React from "react";
+import { StyleSheet, Text, View, Image } from "react-native";
 import { PostItem } from "./PostItem";
 
-export const PostsListItem = (item, navigation, currentUserId) => {
+export const PostsListItem = ({ item, navigation, currentUserId }) => {
   return (
     <View style={{ flex: 1 }}>
       <View style={styles.userData}>
