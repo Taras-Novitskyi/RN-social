@@ -1,24 +1,10 @@
 import {
   getAuth,
-  updateProfile,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
   onAuthStateChanged,
   signOut,
 } from "firebase/auth";
-// import { updateUserProfile, authStateChange, authSignOut } from "./authReducer";
-import { db, storage, app, databaseRef, auth } from "../../firebase/config";
-
-// {
-//     postId,
-//     createdDate,
-//     name,
-//     location,
-//     coords: locationCoords,
-//     photo: linkPhoto,
-//     likes,
-//     owner,
-//   }
+import { db, app, databaseRef, auth } from "../../firebase/config";
+import { showToast } from "../../helpers/showErrorToast";
 
 export const createPost = (newPost) => async (dispatch, getState) => {
   try {
@@ -31,9 +17,10 @@ export const createPost = (newPost) => async (dispatch, getState) => {
     await set(newPostRef, newPost);
     return postId;
   } catch (error) {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    console.log("error.massage:", errorMessage);
+    showToast({
+      text1: `Something wrong, try again.`,
+      text2: `Error ${error.message}`,
+    });
   }
 };
 
@@ -46,9 +33,10 @@ export const updateCountLikes =
         likes: updateLikes,
       });
     } catch (error) {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.log("error.massage:", errorMessage);
+      showToast({
+        text1: `Something wrong, try again.`,
+        text2: `Error ${error.message}`,
+      });
     }
   };
 
@@ -58,14 +46,14 @@ export const authLogOutUser = () => async (dispatch, getState) => {
     await signOut(auth);
     dispatch(authSignOut());
   } catch (error) {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    console.log("error.massage:", errorMessage);
+    showToast({
+      text1: `Something wrong, try again.`,
+      text2: `Error ${error.message}`,
+    });
   }
 };
 
 export const authStateChanged = () => async (dispatch, getState) => {
-  // const auth = getAuth(app);
   await onAuthStateChanged(auth, (user) => {
     if (user) {
       const dataUser = user.auth.currentUser;
@@ -78,15 +66,6 @@ export const authStateChanged = () => async (dispatch, getState) => {
           email: dataUser.email,
         })
       );
-
-      // dispatch(
-      //   updateUserProfile({
-      //     userId: user.uid,
-      //     nickname: user.displayName,
-      //     userPhoto: user.photoURL,
-      //     email: user.email
-      //   })
-      // );
 
       dispatch(authStateChange({ stateChange: true }));
     } else {

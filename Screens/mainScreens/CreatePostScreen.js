@@ -4,15 +4,12 @@ import {
   Text,
   View,
   ScrollView,
-  Button,
   TouchableOpacity,
-  Image,
   ImageBackground,
   KeyboardAvoidingView,
   Keyboard,
   TouchableWithoutFeedback,
   TextInput,
-  Alert,
   ActivityIndicator,
 } from "react-native";
 import { useSelector } from "react-redux";
@@ -24,15 +21,16 @@ import * as Location from "expo-location";
 import * as MediaLibrary from "expo-media-library";
 
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
-import { getDatabase, set, push } from "firebase/database";
+import { set, push } from "firebase/database";
 
-import { db, storage, app, databaseRef } from "../../firebase/config";
+import { db, databaseRef } from "../../firebase/config";
 import {
   selectUserId,
   selectNickname,
   selectUserEmail,
   selectUserPhoto,
 } from "../../redux/auth/authSelectors";
+import { showToast } from "../../helpers/showErrorToast";
 
 export function CreatePostScreen({ navigation }) {
   const [camera, setCamera] = useState(null);
@@ -103,7 +101,10 @@ export function CreatePostScreen({ navigation }) {
 
       setPhoto(photoLink);
     } catch (error) {
-      Alert.alert(error.message);
+      showToast({
+        text1: `Something wrong, try again.`,
+        text2: `Error ${error.message}`,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -112,10 +113,14 @@ export function CreatePostScreen({ navigation }) {
   const onCreatPost = async () => {
     setIsLoading(true);
     if (photo === null) {
-      return Alert.alert("Add a PHOTO in your post");
+      showToast({
+        text1: `Add a PHOTO in your post.`,
+      });
     }
     if (name === "") {
-      return Alert.alert("Add a NAME in your post");
+      showToast({
+        text1: `Add a NAME in your post.`,
+      });
     }
 
     let location = await Location.getCurrentPositionAsync();

@@ -4,8 +4,6 @@ import {
   StyleSheet,
   Text,
   View,
-  Button,
-  ScrollView,
   TextInput,
   Image,
   ImageBackground,
@@ -22,16 +20,13 @@ import {
   getDownloadURL,
   getStorage,
   ref,
-  uploadBytes,
   uploadBytesResumable,
 } from "firebase/storage";
 import * as ImagePicker from "expo-image-picker";
 import uuid from "react-native-uuid";
 
-// import { db, storage, app, databaseRef } from "../../firebase/config";
-// import { selectUserId, selectNickname } from "../../redux/auth/authSelectors";
-
 import { authRegistryUser } from "../../redux/auth/authOperations";
+import { showToast } from "../../helpers/showErrorToast";
 
 const initialeUserPhoto =
   "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png";
@@ -80,9 +75,11 @@ export function RegistrationScreen({ navigation }) {
         ...prevState,
         userPhoto: photoLink,
       }));
-
     } catch (error) {
-      Alert.alert(error.message);
+      showToast({
+        text1: `Something wrong, try again.`,
+        text2: `Error ${error.message}`,
+      });
       return;
     } finally {
       setIsLoading(false);
@@ -108,8 +105,10 @@ export function RegistrationScreen({ navigation }) {
       const link = await getDownloadURL(ref(storage, `userPhoto/${id}`));
       return link;
     } catch (error) {
-      Alert.alert(error.message);
-      return;
+      showToast({
+        text1: `Something wrong, try again.`,
+        text2: `Error ${error.message}`,
+      });
     }
   };
 

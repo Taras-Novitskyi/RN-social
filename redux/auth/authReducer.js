@@ -1,6 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { EmailAuthCredential } from "firebase/auth";
-// import { State } from "react-native-gesture-handler";
 
 const initialState = {
   userId: null,
@@ -8,7 +6,6 @@ const initialState = {
   userEmail: null,
   userPhoto: null,
   stateChange: false,
-  // userActivity: null,
 };
 
 export const authSlice = createSlice({
@@ -22,10 +19,6 @@ export const authSlice = createSlice({
       nickname: payload.nickname,
       userPhoto: payload.userPhoto,
     }),
-    // updateUserActivity: (state, { payload }) => ({
-    //   ...state,
-    //   userActivity: payload.activity,
-    // }),
 
     authStateChange: (state, { payload }) => ({
       ...state,
@@ -41,5 +34,9 @@ export const authSlice = createSlice({
   },
 });
 
-export const { updateUserProfile, authStateChange, updateUserPhoto, authSignOut } =
-  authSlice.actions;
+export const {
+  updateUserProfile,
+  authStateChange,
+  updateUserPhoto,
+  authSignOut,
+} = authSlice.actions;
