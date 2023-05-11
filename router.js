@@ -10,18 +10,6 @@ import { LoginScreen } from "./Screens/auth/LoginScreen";
 import { Home } from "./Screens/Home";
 
 export const useRoute = (isAuth) => {
-  
-  // const handleSubmit = () => {
-  // 	setIsAuth(true)
-  // }
-
-  // useEffect(() => {
-  //   if (state) {
-  //     setIsAuth(true);
-  //   } else {
-  //     setIsAuth(false);
-  //   }
-  // }, [state]);
 
   if (!isAuth) {
     return (
@@ -49,15 +37,3 @@ export const useRoute = (isAuth) => {
   return <Home />;
 };
 
-{
-  /* {isAuth && (
-          <MainStack.Screen
-            name="Home"
-            component={Home}
-            options={{
-              headerShown: false,
-              title: "Home",
-            }}
-          />
-        )} */
-}
