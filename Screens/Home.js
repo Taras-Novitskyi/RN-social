@@ -1,7 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet, Button, TouchableOpacity } from "react-native";
+import { StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { getHeaderTitle } from "@react-navigation/elements";
 import { Feather } from "@expo/vector-icons";
 
 import { CreatePostScreen } from "./mainScreens/CreatePostScreen";

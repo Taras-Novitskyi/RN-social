@@ -1,20 +1,18 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
   View,
-  Button,
   TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
-  ScrollView,
   FlatList,
   Image,
 } from "react-native";
 import { useSelector } from "react-redux";
-import { set, push, ref, onValue, child, get } from "firebase/database";
+import { set, push, onValue } from "firebase/database";
 import { getAuth } from "firebase/auth";
 import { AntDesign } from "@expo/vector-icons";
 
