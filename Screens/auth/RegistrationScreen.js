@@ -15,6 +15,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
+import { Entypo } from "@expo/vector-icons";
 import {
   getDownloadURL,
   getStorage,
@@ -41,8 +42,13 @@ export function RegistrationScreen({ navigation }) {
   const [state, setState] = useState(initialState);
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const dispatch = useDispatch();
+
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
 
   const handleSubmit = async () => {
     setIsLoading(true);
@@ -134,24 +140,14 @@ export function RegistrationScreen({ navigation }) {
                     style={styles.addFotoBtn}
                     onPress={selectFile}
                   >
-                    <Icon
-                      style={styles.iconAdd}
-                      name="add-outline"
-                      size={23}
-                      color="#FF6C00"
-                    />
+                    <Icon name="add-outline" size={23} color="#FF6C00" />
                   </TouchableOpacity>
                 ) : (
                   <TouchableOpacity
                     style={styles.deleteFotoBtn}
                     onPress={deleteFile}
                   >
-                    <Icon
-                      style={styles.iconDelete}
-                      name="close-outline"
-                      size={23}
-                      color="#E8E8E8"
-                    />
+                    <Icon name="close-outline" size={23} color="#E8E8E8" />
                   </TouchableOpacity>
                 )}
               </View>
@@ -174,16 +170,28 @@ export function RegistrationScreen({ navigation }) {
                 placeholderTextColor="#BDBDBD"
                 style={styles.input}
               />
-              <TextInput
-                value={state.password}
-                onChangeText={(value) =>
-                  setState((prevState) => ({ ...prevState, password: value }))
-                }
-                placeholder="Password"
-                placeholderTextColor="#BDBDBD"
-                secureTextEntry={true}
-                style={styles.input}
-              />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  value={state.password}
+                  onChangeText={(value) =>
+                    setState((prevState) => ({ ...prevState, password: value }))
+                  }
+                  placeholder="Password"
+                  placeholderTextColor="#BDBDBD"
+                  secureTextEntry={!showPassword}
+                  style={styles.input}
+                />
+                <TouchableOpacity
+                  style={styles.btnShowPassword}
+                  onPress={handleClickShowPassword}
+                >
+                  {!showPassword ? (
+                    <Entypo name="eye" size={24} color="black" />
+                  ) : (
+                    <Entypo name="eye-with-line" size={24} color="black" />
+                  )}
+                </TouchableOpacity>
+              </View>
               <TouchableOpacity
                 style={styles.button}
                 onPress={handleSubmit}
@@ -255,7 +263,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 1,
     borderColor: "#FF6C00",
-    // backgroundColor: "#FF6C00",
   },
   deleteFotoBtn: {
     position: "absolute",
@@ -269,22 +276,21 @@ const styles = StyleSheet.create({
     borderColor: "#E8E8E8",
     backgroundColor: "#FFFFFF",
   },
-  iconAdd: {
-    // borderWidth: 1,
-    // backgroundColor: "#FF6C00",
-    // borderRadius: 16,
-  },
-  iconDelete: {
-    // color: "#E8E8E8",
-    // backgroundColor: "#FFFFFF",
-    // borderRadius: 50,
-  },
   title: {
     fontSize: 30,
     letterSpacing: 0.01,
     color: "#212121",
     textAlign: "center",
     marginBottom: 33,
+  },
+  passwordContainer: {
+    position: "relative",
+  },
+  btnShowPassword: {
+    position: "absolute",
+    top: "50%",
+    right: 32,
+    transform: [{ translateY: -5 }],
   },
   input: {
     height: 44,

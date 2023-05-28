@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
+import { Entypo } from "@expo/vector-icons";
 
 import { authSignInUser } from "../../redux/auth/authOperations";
 
@@ -24,8 +25,13 @@ const initialState = {
 export function LoginScreen({ navigation }) {
   const [state, setState] = useState(initialState);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const dispatch = useDispatch();
+
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
 
   const handleSubmit = async () => {
     setIsLoading(true);
@@ -60,19 +66,31 @@ export function LoginScreen({ navigation }) {
                 placeholderTextColor="#BDBDBD"
                 style={styles.input}
               />
-              <TextInput
-                value={state.password}
-                onChangeText={(value) =>
-                  setState((prevState) => ({
-                    ...prevState,
-                    password: value,
-                  }))
-                }
-                placeholder="Password"
-                placeholderTextColor="#BDBDBD"
-                secureTextEntry={true}
-                style={styles.input}
-              />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  value={state.password}
+                  onChangeText={(value) =>
+                    setState((prevState) => ({
+                      ...prevState,
+                      password: value,
+                    }))
+                  }
+                  placeholder="Password"
+                  placeholderTextColor="#BDBDBD"
+                  secureTextEntry={!showPassword}
+                  style={styles.input}
+                />
+                <TouchableOpacity
+                  style={styles.btnShowPassword}
+                  onPress={handleClickShowPassword}
+                >
+                  {!showPassword ? (
+                    <Entypo name="eye" size={24} color="black" />
+                  ) : (
+                    <Entypo name="eye-with-line" size={24} color="black" />
+                  )}
+                </TouchableOpacity>
+              </View>
               <TouchableOpacity
                 style={styles.button}
                 onPress={handleSubmit}
@@ -106,20 +124,16 @@ export function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // alignItems: "center",
     justifyContent: "center",
   },
   BGImage: {
     flex: 1,
     justifyContent: "flex-end",
-    // alignItems: "center",
   },
   form: {
     justifyContent: "center",
     backgroundColor: "#ecf0f1",
-    // paddingHorizontal: 16,
     paddingTop: 32,
-    // paddingBottom: 76,
     borderTopRightRadius: 25,
     borderTopLeftRadius: 25,
   },
@@ -129,7 +143,15 @@ const styles = StyleSheet.create({
     color: "#212121",
     textAlign: "center",
     marginBottom: 33,
-    // marginTop: 32,
+  },
+  passwordContainer: {
+    position: "relative",
+  },
+  btnShowPassword: {
+    position: "absolute",
+    top: "50%",
+    right: 32,
+    transform: [{ translateY: -5 }],
   },
   input: {
     height: 44,
