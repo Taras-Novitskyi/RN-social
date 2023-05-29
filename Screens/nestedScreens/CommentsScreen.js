@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo, useCallback, useMemo } from "react";
 import {
   StyleSheet,
   Text,
@@ -24,7 +24,7 @@ import {
 import { db, databaseRef, app } from "../../firebase/config";
 import { CommentItem } from "../../Components/CommentItem";
 
-const ListHeaderComponent = React.memo(({ postPhoto }) => {
+const ListHeaderComponent = memo(({ postPhoto }) => {
   return (
     <View style={styles.photoContainer}>
       <Image source={{ uri: postPhoto }} style={styles.photo} />
@@ -49,7 +49,11 @@ export function CommentsScreen({ route, navigation }) {
     getPostPhoto();
   }, [route]);
 
-  const getPostPhoto = async () => {
+  // useEffect(() => {
+  //   getPostPhoto();
+  // }, []);
+
+  const getPostPhoto = () => {
     const postRef = databaseRef(db, "posts/" + postId);
     let postPhoto = null;
 
@@ -114,14 +118,6 @@ export function CommentsScreen({ route, navigation }) {
     getAllComments();
   };
 
-  // const ListHeaderComponent = () => {
-  //   return (
-  //     <View style={styles.photoContainer}>
-  //       <Image source={{ uri: postPhoto }} style={styles.photo} />
-  //     </View>
-  //   );
-  // };
-
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.container}>
@@ -130,29 +126,27 @@ export function CommentsScreen({ route, navigation }) {
           style={{ flex: 1 }}
         >
           <>
-            {allComments.length > 0 && (
-              <FlatList
-                data={allComments}
-                // renderItem={({ item }) => CommentItem(item, userId)}
-                renderItem={({ item }) => CommentItem(item, userId)}
-                keyExtractor={(item, index) => index.toString()}
-                ListHeaderComponent={() => (
+            <FlatList
+              data={allComments}
+              renderItem={({ item }) => CommentItem(item, userId)}
+              keyExtractor={(item, index) => index.toString()}
+              ListHeaderComponent={() =>
+                allComments.length === 0 ? (
+                  <>
+                    <ListHeaderComponent postPhoto={postPhoto} />
+                    <Text style={styles.title}>No comments</Text>
+                  </>
+                ) : (
                   <ListHeaderComponent postPhoto={postPhoto} />
-                )}
-              />
-            )}
-            {allComments.length === 0 && (
-              <>
-                <ListHeaderComponent postPhoto={postPhoto} />
-                <Text style={styles.title}>No comments</Text>
-              </>
-            )}
+                )
+              }
+            />
             <View style={styles.form}>
               <TextInput
                 value={comment}
                 name="comment"
                 onChangeText={commentHandler}
-                placeholder="You comment..."
+                placeholder="Your comment..."
                 placeholderTextColor="#BDBDBD"
                 multiline
                 textAlignVertical="top"
