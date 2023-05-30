@@ -15,7 +15,7 @@ import { selectUserId } from "../../redux/auth/authSelectors";
 import { showToast } from "../../helpers/showErrorToast";
 
 export function DefaultScreen({ route, navigation }) {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const currentUserId = useSelector(selectUserId);
@@ -58,7 +58,7 @@ export function DefaultScreen({ route, navigation }) {
         <ActivityIndicator size="large" />
       ) : (
         <>
-          {posts.length > 0 && (
+          {posts && posts.length > 0 && (
             <FlatList
               data={posts}
               renderItem={({ item }) =>
@@ -67,7 +67,9 @@ export function DefaultScreen({ route, navigation }) {
               keyExtractor={(item, index) => index.toString()}
             />
           )}
-          {posts.length === 0 && <Text style={styles.title}>No posts</Text>}
+          {posts && posts.length === 0 && (
+            <Text style={styles.title}>No posts</Text>
+          )}
         </>
       )}
     </View>

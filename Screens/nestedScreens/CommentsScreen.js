@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo, useCallback, useMemo } from "react";
+import React, { useState, useEffect, memo } from "react";
 import {
   StyleSheet,
   Text,
@@ -48,10 +48,6 @@ export function CommentsScreen({ route, navigation }) {
     getAllComments();
     getPostPhoto();
   }, [route]);
-
-  // useEffect(() => {
-  //   getPostPhoto();
-  // }, []);
 
   const getPostPhoto = () => {
     const postRef = databaseRef(db, "posts/" + postId);

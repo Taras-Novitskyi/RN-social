@@ -1,9 +1,7 @@
 import React from "react";
-import { useDispatch } from "react-redux";
 import { StyleSheet } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 
-import { authLogOutUser } from "../../redux/auth/authOperations";
 import { CommentsScreen } from "../nestedScreens/CommentsScreen";
 import { MapScreen } from "../nestedScreens/MapScreen";
 import { DefaultScreen } from "../nestedScreens/DefaultScreen";
@@ -12,11 +10,6 @@ import { LogOut } from "../../Components/LogOut";
 const NestedScreens = createStackNavigator();
 
 export const PostsScreen = ({ route, navigation }) => {
-  const dispatch = useDispatch();
-
-  const logOut = () => {
-    dispatch(authLogOutUser());
-  };
 
   return (
     <>
