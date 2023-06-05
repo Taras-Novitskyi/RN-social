@@ -1,6 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { EmailAuthCredential } from "firebase/auth";
-// import { State } from "react-native-gesture-handler";
 
 const initialState = {
   userId: null,

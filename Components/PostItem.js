@@ -72,7 +72,6 @@ export const PostItem = ({ item, navigation, currentUserId }) => {
       "posts/" + item.postId + "/likes/" + currentUserLikeId
     );
 
-    // setCurrentUserLikeId(null);
     currentUserLikeId = null;
     await remove(userLikeRef);
   };
@@ -143,7 +142,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   photoContainer: {
-    // flex: 1,
     height: 240,
     marginBottom: 8,
     alignItems: "center",

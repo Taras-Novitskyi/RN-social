@@ -46,7 +46,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   profilePhoto: {
-    // flex: 1,
     width: 60,
     height: 60,
     borderRadius: 16,

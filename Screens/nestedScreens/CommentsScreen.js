@@ -56,7 +56,6 @@ export function CommentsScreen({ route, navigation }) {
     onValue(
       postRef,
       (snapshot) => {
-        // id: childSnapshot.key,
         const data = snapshot.val();
         postPhoto = data.photo;
 
