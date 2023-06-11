@@ -16,11 +16,7 @@ import { set, push, onValue } from "firebase/database";
 import { getAuth } from "firebase/auth";
 import { AntDesign } from "@expo/vector-icons";
 
-import {
-  selectNickname,
-  selectUserId,
-  selectUserPhoto,
-} from "../../redux/auth/authSelectors";
+import { selectNickname, selectUserId } from "../../redux/auth/authSelectors";
 import { db, databaseRef, app } from "../../firebase/config";
 import { CommentItem } from "../../Components/CommentItem";
 
@@ -39,28 +35,29 @@ export function CommentsScreen({ route, navigation }) {
 
   const nickname = useSelector(selectNickname);
   const userId = useSelector(selectUserId);
-  const userPhoto = useSelector(selectUserPhoto);
 
   const { postId } = route.params;
   const commentHandler = (text) => setComment(text);
 
   useEffect(() => {
-    getAllComments();
-    getPostPhoto();
-  }, [route]);
+    (async () => {
+      await getAllComments();
+      await getPostPhoto();
+    })();
+  }, []);
 
-  const getPostPhoto = () => {
+  const getPostPhoto = async () => {
     const postRef = databaseRef(db, "posts/" + postId);
-    let postPhoto = null;
+    let postPhoto1 = null;
 
-    onValue(
+    await onValue(
       postRef,
       (snapshot) => {
         const data = snapshot.val();
-        postPhoto = data.photo;
+        postPhoto1 = data.photo;
 
-        setPostPhoto(postPhoto);
-        postPhoto = null;
+        setPostPhoto(postPhoto1);
+        postPhoto1 = null;
       },
       {
         onlyOnce: true,
@@ -72,7 +69,7 @@ export function CommentsScreen({ route, navigation }) {
     const commentsRef = await databaseRef(db, "posts/" + postId + "/comments");
     let allCommentsDB = [];
 
-    onValue(commentsRef, (snapshot) => {
+    await onValue(commentsRef, (snapshot) => {
       snapshot.forEach((childSnapshot) => {
         const commentItem = {
           id: childSnapshot.key,
@@ -110,56 +107,55 @@ export function CommentsScreen({ route, navigation }) {
 
     Keyboard.dismiss();
     setComment("");
-    getAllComments();
+    await getAllComments();
   };
 
   return (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <View style={styles.container}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS == "ios" ? "padding" : "height"}
-          style={{ flex: 1 }}
-        >
-          <>
-            <FlatList
-              data={allComments}
-              renderItem={({ item }) => CommentItem(item, userId)}
-              keyExtractor={(item, index) => index.toString()}
-              ListHeaderComponent={() =>
-                allComments.length === 0 ? (
-                  <>
-                    <ListHeaderComponent postPhoto={postPhoto} />
-                    <Text style={styles.title}>No comments</Text>
-                  </>
-                ) : (
+    <View style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS == "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <>
+          <FlatList
+            data={allComments}
+            renderItem={({ item }) => CommentItem(item, userId)}
+            keyExtractor={(item, index) => index.toString()}
+            keyboardShouldPersistTaps="handled"
+            ListHeaderComponent={
+              allComments.length === 0 ? (
+                <>
                   <ListHeaderComponent postPhoto={postPhoto} />
-                )
-              }
+                  <Text style={styles.title}>No comments</Text>
+                </>
+              ) : (
+                <ListHeaderComponent postPhoto={postPhoto} />
+              )
+            }
+          />
+          <View style={styles.form}>
+            <TextInput
+              value={comment}
+              name="comment"
+              onChangeText={commentHandler}
+              placeholder="Your comment..."
+              placeholderTextColor="#BDBDBD"
+              multiline
+              textAlignVertical="top"
+              maxLength={500}
+              style={styles.input}
             />
-            <View style={styles.form}>
-              <TextInput
-                value={comment}
-                name="comment"
-                onChangeText={commentHandler}
-                placeholder="Your comment..."
-                placeholderTextColor="#BDBDBD"
-                multiline
-                textAlignVertical="top"
-                maxLength={500}
-                style={styles.input}
-              />
-              <TouchableOpacity
-                style={styles.button}
-                onPress={createComment}
-                activeOpacity={0.8}
-              >
-                <AntDesign name="arrowup" size={24} color="white" />
-              </TouchableOpacity>
-            </View>
-          </>
-        </KeyboardAvoidingView>
-      </View>
-    </TouchableWithoutFeedback>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={createComment}
+              activeOpacity={0.8}
+            >
+              <AntDesign name="arrowup" size={24} color="white" />
+            </TouchableOpacity>
+          </View>
+        </>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -206,8 +202,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E8E8E8",
     borderRadius: 100,
-    // backgroundColor: "#F6F6F6F",
-    // fontFamily:
     fontSize: 16,
     color: "#212121",
   },
