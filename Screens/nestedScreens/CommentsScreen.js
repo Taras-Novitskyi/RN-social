@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,7 +6,6 @@ import {
   TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
-  TouchableWithoutFeedback,
   Keyboard,
   FlatList,
   Image,
@@ -20,13 +19,13 @@ import { selectNickname, selectUserId } from "../../redux/auth/authSelectors";
 import { db, databaseRef, app } from "../../firebase/config";
 import { CommentItem } from "../../Components/CommentItem";
 
-const ListHeaderComponent = memo(({ postPhoto }) => {
+const ListHeaderComponent = ({ postPhoto }) => {
   return (
     <View style={styles.photoContainer}>
       <Image source={{ uri: postPhoto }} style={styles.photo} />
     </View>
   );
-});
+};
 
 export function CommentsScreen({ route, navigation }) {
   const [comment, setComment] = useState("");
@@ -40,11 +39,9 @@ export function CommentsScreen({ route, navigation }) {
   const commentHandler = (text) => setComment(text);
 
   useEffect(() => {
-    (async () => {
-      await getAllComments();
-      await getPostPhoto();
-    })();
-  }, []);
+    getAllComments();
+    getPostPhoto();
+  });
 
   const getPostPhoto = async () => {
     const postRef = databaseRef(db, "posts/" + postId);
