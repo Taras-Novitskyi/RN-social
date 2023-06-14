@@ -10,7 +10,6 @@ import { LogOut } from "../../Components/LogOut";
 const NestedScreens = createStackNavigator();
 
 export const PostsScreen = ({ route, navigation }) => {
-
   return (
     <>
       <NestedScreens.Navigator
@@ -29,9 +28,7 @@ export const PostsScreen = ({ route, navigation }) => {
           component={DefaultScreen}
           options={{
             title: "Posts",
-            headerRight: () => (
-              <LogOut />
-            ),
+            headerRight: () => <LogOut />,
           }}
         />
         <NestedScreens.Screen name="Comments" component={CommentsScreen} />

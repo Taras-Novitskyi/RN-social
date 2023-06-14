@@ -16,7 +16,7 @@ import { getAuth } from "firebase/auth";
 import { AntDesign } from "@expo/vector-icons";
 
 import { selectNickname, selectUserId } from "../../redux/auth/authSelectors";
-import { db, databaseRef, app } from "../../firebase/config";
+import { db, databaseRef } from "../../firebase/config";
 import { CommentItem } from "../../Components/CommentItem";
 
 const ListHeaderComponent = ({ postPhoto }) => {
@@ -41,13 +41,18 @@ export function CommentsScreen({ route, navigation }) {
   useEffect(() => {
     getAllComments();
     getPostPhoto();
-  });
 
-  const getPostPhoto = async () => {
+    return () => {
+      setPostPhoto(null);
+      setAllComments([]);
+    };
+  }, [postId]);
+
+  const getPostPhoto = () => {
     const postRef = databaseRef(db, "posts/" + postId);
     let postPhoto1 = null;
 
-    await onValue(
+    onValue(
       postRef,
       (snapshot) => {
         const data = snapshot.val();
@@ -62,11 +67,11 @@ export function CommentsScreen({ route, navigation }) {
     );
   };
 
-  const getAllComments = async () => {
-    const commentsRef = await databaseRef(db, "posts/" + postId + "/comments");
+  const getAllComments = () => {
+    const commentsRef = databaseRef(db, "posts/" + postId + "/comments");
     let allCommentsDB = [];
 
-    await onValue(commentsRef, (snapshot) => {
+    onValue(commentsRef, (snapshot) => {
       snapshot.forEach((childSnapshot) => {
         const commentItem = {
           id: childSnapshot.key,
@@ -104,7 +109,7 @@ export function CommentsScreen({ route, navigation }) {
 
     Keyboard.dismiss();
     setComment("");
-    await getAllComments();
+    getAllComments();
   };
 
   return (

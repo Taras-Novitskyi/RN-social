@@ -87,7 +87,11 @@ export const PostItem = ({ item, navigation, currentUserId }) => {
           <TouchableOpacity
             style={styles.link}
             onPress={() =>
-              navigation.navigate("Comments", { postId: item.postId })
+              // navigation.navigate("Comments", { postId: item.postId })
+              navigation.navigate("Posts", {
+                screen: "Comments",
+                params: { postId: item.postId },
+              })
             }
           >
             <Icon
